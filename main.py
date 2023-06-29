@@ -1,12 +1,12 @@
-print("\n###########################################################\n### Initiating Parti Gábor's Primitive PDF Audio Reader ###\n###########################################################\n")
-  
-print("Instructions:\n - Put a pdf in the same folder as this python file.\n - A quick setup will follow with 5 options: voice, speed, path, document, and page; you have to input your settings.\n - Press enter for the default settings.\n\nDependencies: You will also need these two packages: PyPDF2, pyttsx3.")
+print("\n###############################################\n### Initiating Parti's Primitive PDF Reader ###\n###############################################\n")
+
+print("Instructions:\n - Put a pdf in the same folder as this python file.\n - A quick, 5 question setup will follow regarding voice, speed, path, document, and page.\n - You can to input your settings or press enter for the default settings.\n\nDependencies: You will also need these two packages: PyPDF2, pyttsx3.\nLimitations: Currently the only way to stop the engine is to kill the terminal.")
 
 # %pip install pyttsx3
 # %pip install PyPDF2
-# %pip install pygame
+# %pip install pygame # not needed
 
-import easygui
+# import easygui # not needed
 import os
 import sys
 import glob
@@ -16,7 +16,7 @@ import regex as re
 import time
 import PyPDF2
 import pyttsx3
-# from pygame import mixer
+# from pygame import mixer # not needed
 
 ### Use auto-py-to-exe to make exe ###
 
@@ -28,7 +28,7 @@ voices = engine.getProperty('voices')
 # engine.setProperty('voice', voices[1].id)
 
 # select voice
-print("\n1. Select voice. Type 'f' or 'm' for a female or a male voice. (Default is female.)")
+print("\n1. Select voice. Type 'f' or 'm' for a female or a male voice. (Hit enter for female.)")
 voice_choice = str(input("Please select voice (f/m): ")) or "f"
 
 if voice_choice == "m":
@@ -39,7 +39,7 @@ elif voice_choice == "f":
   print("\tOK, loading robotic female voice engine.")
 else:
   engine.setProperty('voice', voices[1].id)
-  print("\tOops, you have failed to hit any of the right keys, ...loser. Now you have to start again.")
+  print("\tOops, you have failed to hit any of the right keys, ... start again.")
   exit()
 
 
@@ -48,7 +48,7 @@ else:
 # engine.setProperty('rate', 200)
 
 # select speed
-print("\n2. Select speed. Enter a value between 120 and 300 words per minute. (Default is 200 wpm.)")
+print("\n2. Select speed. Enter a value between 120 and 300 words per minute. (Hit enter for 200 wpm.)")
 speed_choice = input("Please enter speed: ") or "200"
 engine.setProperty('rate', int(speed_choice))
 print("\tOK, loading requested reading rate of", speed_choice, "wpm.")
@@ -63,7 +63,7 @@ print("\tOK, loading requested reading rate of", speed_choice, "wpm.")
 # absolute path (local)
 print("\n3. Select files' directory.")
 path = sys.path[0]
-path_choice = input('Please enter path, such as "C:\\Users\\user\\read\\"') or path
+path_choice = input('Please enter path, such as "C:\\Users\\user\\read\\" (Hit enter for current folder.)') or path
 print(path)
 
 # list of pdfs in relative  directory
@@ -81,7 +81,7 @@ for file in glob.glob("*.pdf"):
 # book_choice = pdfs[0]
 
 # select file
-print("\n4. Please select a pdf. Enter the filename here, with extension. (Default is the first pdf alphabetically.)")
+print("\n4. Please select a pdf. Enter the filename here, with extension. (Hit enter for the first pdf alphabetically)")
 book_choice = str(input("Please enter filename: ")) or pdfs[0]
 
 
@@ -99,16 +99,16 @@ df = pd.DataFrame(columns=['page_no', 'page'])
 print("\t1/3...")
 
 # creating a pdf reader object 
-pdfReader = PyPDF2.PdfFileReader(pdfFileObj, strict=False) 
-pages = pdfReader.numPages
+reader = PyPDF2.PdfReader(pdfFileObj, strict=False) 
+pages = len(reader.pages)
 
 print("\t2/3...")
 
 for p in range(pages):
-  pageObj = pdfReader.getPage(p)
+  pageObj = reader.pages[p]
   # print(p)
   df.loc[p, 'page_no'] = p+1
-  page_content = pageObj.extractText()
+  page_content = pageObj.extract_text()
   # print(page_content)
   df.loc[p, 'page'] = page_content
 
@@ -140,7 +140,7 @@ df['page'] = [re.sub(r'\s+', " ", str(x)) for x in df['page']]
 
 content = " ".join(df['page'].tolist())
 
-print("\n5. Do you want to continue where you have left off?\nIf yes, please enter a page number, if no, hit enter.")
+print("\n5. Enter the page number you would like to continue, or hit enter to start from the beginning.")
 page_choice = input("Please enter page number: ") or "0"
 page_choice = int(page_choice)
 print("\tPage", str(page_choice), "selected, flipping to the page now...")
