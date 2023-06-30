@@ -29,15 +29,13 @@ engine.setProperty('rate', 200)
 
 # relative path (current folder)
 path = sys.path[0] # does not work with auto-py-to-exe, use "C:\\Users\\user\\...\\"
-
-# list of pdfs in relative  directory
-pdfs = glob.glob("*.pdf")
+path = "C:\\Users\\parti\\Documents\\"
 
 # list of pdfs in absolute directory
-# pdfs = []
-# os.chdir(path)
-# for file in glob.glob("*.pdf"):
-#     pdfs.append(file)
+pdfs = []
+os.chdir(path)
+for file in glob.glob("*.pdf"):
+    pdfs.append(file)
 
 # file
 book_choice = pdfs[0]

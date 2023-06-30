@@ -62,7 +62,8 @@ print("\tOK, loading requested reading rate of", speed_choice, "wpm.")
 
 # absolute path (local)
 print("\n3. Select files' directory.")
-path = sys.path[0]
+# path = sys.path[0] # does not work with auto-py-to-exe
+path = "C:\\Users\\parti\\Documents\\"
 path_choice = input('Please enter path, such as "C:\\Users\\user\\read\\" (Hit enter for current folder.)') or path
 print(path)
 
