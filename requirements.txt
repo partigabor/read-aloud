@@ -1,0 +1,5 @@
+numpy==1.25.0
+pandas==2.0.3
+PyPDF2==3.0.1
+pyttsx3==2.90
+regex==2023.6.3
