@@ -8,7 +8,7 @@ import sys
 import glob
 import pandas as pd
 import numpy as np
-import regex as re
+import re
 import time
 import PyPDF2
 import pyttsx3

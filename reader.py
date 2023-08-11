@@ -12,10 +12,18 @@ import sys
 import glob
 import pandas as pd
 import numpy as np
-import regex as re
+import re
 import time
 import PyPDF2
 import pyttsx3
+
+# Switch to default UI's language if possible
+import locale
+import ctypes
+windll = ctypes.windll.kernel32
+current_lang = locale.windows_locale[ windll.GetUserDefaultUILanguage() ]
+print(current_lang)
+
 # from pygame import mixer # not needed
 
 ### Use auto-py-to-exe to make exe ###
@@ -28,8 +36,8 @@ voices = engine.getProperty('voices')
 # engine.setProperty('voice', voices[1].id)
 
 # select voice
-print("\n1. Select voice. Type 'f' or 'm' for a female or a male voice. (Hit enter for female.)")
-voice_choice = str(input("Please select voice (f/m): ")) or "f"
+print("\n1. Select voice. Type 'f' or 'm' for a female or a male voice, or 's' for system's default. (Hit enter for female.)")
+voice_choice = str(input("Please select voice (f/m/s): ")) or "f"
 
 if voice_choice == "m":
   engine.setProperty('voice', voices[0].id)
@@ -37,6 +45,11 @@ if voice_choice == "m":
 elif voice_choice == "f": 
   engine.setProperty('voice', voices[1].id)
   print("\tOK, loading robotic female voice engine.")
+elif voice_choice == "s":
+  for voice in voices:
+    if current_lang in voice.languages:
+      engine.setProperty('voice', voice.id)
+      break
 else:
   engine.setProperty('voice', voices[1].id)
   print("\tOops, you have failed to hit any of the right keys, ... start again.")
