@@ -39,8 +39,8 @@ except:
 # setup engine
 engine = pyttsx3.init()
 voices = engine.getProperty('voices')
-for voice in voices:
-  print(voice)
+#for voice in voices:
+#  print(voice)
 
 # voice
 # engine.setProperty('voice', voices[1].id)
