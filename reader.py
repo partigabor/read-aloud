@@ -26,8 +26,11 @@ langdic = {"en_GB" : "English (Great Britain)", "en_US" : "English (United State
 #for testing 
 #current_language_name = "English (United States)"
 #
-current_language_name = langdic[current_lang]
-print(current_lang)
+try:
+  current_language_name = langdic[current_lang]
+except:
+  current_language_name = "English (United States)"
+
 
 # from pygame import mixer # not needed
 
