@@ -1,6 +1,8 @@
-print("\n###############################################\n### Initiating Parti's Primitive PDF Reader ###\n###############################################\n")
+ruler = "\n###############################################\n"
+print(ruler + "### Initiating Parti's Primitive PDF Reader ###" + ruler)
 
-print("Instructions:\n - Put a pdf in the same folder as this python file.\n - A quick, 5 question setup will follow regarding voice, speed, path, document, and page.\n - You can to input your settings or press enter for the default settings.\n\nDependencies: You will also need some python packages, run `pip install -r requirements.txt`.\nLimitations: Currently the only way to stop the engine is to kill the terminal.")
+
+#print("Instructions:\n - Put a pdf in the same folder as this python file.\n - A quick, 5 question setup will follow regarding voice, speed, path, document, and page.\n - You can to input your settings or press enter for the default settings.\n\nDependencies: You will also need some python packages, run `pip install -r requirements.txt`.\nLimitations: Currently the only way to stop the engine is to kill the terminal.")
 
 # %pip install pyttsx3
 # %pip install PyPDF2
@@ -12,7 +14,10 @@ import sys
 import glob
 import pandas as pd
 import numpy as np
+
 import re
+import json
+
 import time
 import PyPDF2
 import pyttsx3
@@ -23,6 +28,19 @@ import ctypes
 windll = ctypes.windll.kernel32
 current_lang = locale.windows_locale[ windll.GetUserDefaultUILanguage() ]
 langdic = {"en_GB" : "English (Great Britain)", "en_US" : "English (United States)", "de_DE" : "German"}
+
+json_data = ""
+
+try:
+  with open(f"locales/{current_lang}.json") as jsd:
+    json_data = json.load(jsd)
+  jsd.close()
+except:
+  with open(f"locales/default.json") as jsd:
+    json_data = json.load(jsd)
+  jsd.close()
+
+print(json_data["Introduction"])
 #for testing 
 #current_language_name = "English (United States)"
 #
@@ -46,15 +64,15 @@ voices = engine.getProperty('voices')
 # engine.setProperty('voice', voices[1].id)
 
 # select voice
-print("\n1. Select voice. Type 'f' or 'm' for a female or a male voice, or 's' for system's default. (Hit enter for female.)")
-voice_choice = str(input("Please select voice (f/m/s): ")) or "f"
+print(json_data["SelectVoice"])
+voice_choice = str(input(json_data["QuestionVoiceChoice"])) or "f"
 
 if voice_choice == "m":
   engine.setProperty('voice', voices[0].id)
-  print("\tOK, loading robotic male voice engine.")
+  print(json_data["AnswerFirstVoiceSelected"])
 elif voice_choice == "f": 
   engine.setProperty('voice', voices[1].id)
-  print("\tOK, loading robotic female voice engine.")
+  print(json_data["AnswerSecondVoiceSelected"])
 elif voice_choice == "s":
   for voice in voices:
     if current_lang in voice.languages or current_language_name in voice.name:
@@ -62,7 +80,7 @@ elif voice_choice == "s":
       break
 else:
   engine.setProperty('voice', voices[1].id)
-  print("\tOops, you have failed to hit any of the right keys, ... start again.")
+  print(json_data["OopsNotAnyRightKey"])
   exit()
 
 
@@ -71,10 +89,10 @@ else:
 # engine.setProperty('rate', 200)
 
 # select speed
-print("\n2. Select speed. Enter a value between 120 and 300 words per minute. (Hit enter for 200 wpm.)")
-speed_choice = input("Please enter speed: ") or "200"
+print(json_data["SelectSpeed"])
+speed_choice = input(json_data["QuestionEnterSpeed"]) or "200"
 engine.setProperty('rate', int(speed_choice))
-print("\tOK, loading requested reading rate of", speed_choice, "wpm.")
+print(json_data["AnswerSpeedSelected"].format(speed_choice))
 
 
 
@@ -84,10 +102,10 @@ print("\tOK, loading requested reading rate of", speed_choice, "wpm.")
 # path = sys.path[0] # does not work with auto-py-to-exe
 
 # absolute path (local)
-print("\n3. Select files' directory.")
+print(json_data["SelectDirectory"])
 path = sys.path[0] # does not work with auto-py-to-exe
-# path = "C:\\Users\\parti\\Documents\\"
-path_choice = input('Please enter path, such as "C:\\Users\\user\\read\\" (Hit enter for current folder.)') or path
+#
+path_choice = input(json_data["QuestionEnterPath"]) or path
 print(path)
 
 # list of pdfs in relative  directory
@@ -105,8 +123,8 @@ for file in glob.glob("*.pdf"):
 # book_choice = pdfs[0]
 
 # select file
-print("\n4. Please select a pdf. Enter the filename here, with extension. (Hit enter for the first pdf alphabetically)")
-book_choice = str(input("Please enter filename: ")) or pdfs[0]
+print(json_data["SelectPDFFile"])
+book_choice = str(input(json_data["QuestionSelectPDF"])) or pdfs[0]
 
 
 
@@ -115,7 +133,9 @@ book_choice = str(input("Please enter filename: ")) or pdfs[0]
 # creating a pdf file object
 pdfFileObj = open(path+"\\"+book_choice, 'rb')
 
-print("\tParsing book:", path+"\\"+book_choice,"\n\tThis might take some time if your document is several hundred pages long...")
+print(json_data["ParsingBook"] + path+"\\"+book_choice)
+#
+print(json_data["HavePatience"])
 
 # initialize dataframe to hold documents
 df = pd.DataFrame(columns=['page_no', 'page'])
@@ -125,6 +145,9 @@ print("\t1/3...")
 # creating a pdf reader object 
 reader = PyPDF2.PdfReader(pdfFileObj, strict=False) 
 pages = len(reader.pages)
+#
+#print(json_data["InfoNumPages"].format(pages))
+#possible early user interaction here
 
 print("\t2/3...")
 
@@ -141,15 +164,15 @@ print("\t3/3...")
 #closing the pdf file object 
 pdfFileObj.close() 
 
-print("\tPages found:",df.shape[0])
+print(json_data["InfoNumPages"].format(df.shape[0]))
 df['page'].replace('', np.nan, inplace=True)
 df.dropna(subset=['page'], inplace=True)
 df.reset_index(drop=True, inplace=True)
 
 # printing number of pages in pdf file 
-print("\tDropping empty ones... Done.\n\tTotal number of pages are", str(df.shape[0]))
+print(json_data["DroppingEmptyPages"], str(df.shape[0]))
 time.sleep(1)
-print("\tCleaning some of the mess...")
+print(json_data["TidyingUp"])
 
 df['page'] = [re.sub(r'\n+', " ", str(x)) for x in df['page']]
 df['page'] = [re.sub(r"([a-z])([A-Z])", r"\1 \2", str(x)) for x in df['page']]
@@ -164,10 +187,11 @@ df['page'] = [re.sub(r'\s+', " ", str(x)) for x in df['page']]
 
 content = " ".join(df['page'].tolist())
 
-print("\n5. Enter the page number you would like to continue, or hit enter to start from the beginning.")
-page_choice = input("Please enter page number: ") or "0"
+print(json_data["SelectStartingPage"])
+page_choice = input(json_data["QuestionStartPage"]) or "0"
+
 page_choice = int(page_choice)
-print("\tPage", str(page_choice), "selected, flipping to the page now...")
+print(json_data["FlippingPage"].format(page_choice))
 time.sleep(1)
 
 # cutoff before start
@@ -186,7 +210,7 @@ def convert_to_preferred_format(sec):
    sec %= 60
    return "%02d:%02d:%02d" % (hour, min, sec) 
 
-print("\nEstimated time of the audio:", convert_to_preferred_format(seconds))
+print(json_data["EstimatedAudioTime"], convert_to_preferred_format(seconds))
 time.sleep(1)
 
 # print("\nGo!\n")
@@ -198,5 +222,5 @@ for i, row in df.iterrows():
     print(row['page'])
     engine.say(row['page']) # to read immediately
     engine.runAndWait()
-
-print("Book finished!")
+print(ruler)
+print(json_data["BookFinished"])
