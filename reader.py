@@ -2,8 +2,6 @@ ruler = "\n###############################################\n"
 print(ruler + "### Initiating Parti's Primitive PDF Reader ###" + ruler)
 
 
-#print("Instructions:\n - Put a pdf in the same folder as this python file.\n - A quick, 5 question setup will follow regarding voice, speed, path, document, and page.\n - You can to input your settings or press enter for the default settings.\n\nDependencies: You will also need some python packages, run `pip install -r requirements.txt`.\nLimitations: Currently the only way to stop the engine is to kill the terminal.")
-
 # %pip install pyttsx3
 # %pip install PyPDF2
 # %pip install pygame # not needed
@@ -27,7 +25,11 @@ import locale
 import ctypes
 windll = ctypes.windll.kernel32
 current_lang = locale.windows_locale[ windll.GetUserDefaultUILanguage() ]
-langdic = {"en_GB" : "English (Great Britain)", "en_US" : "English (United States)", "de_DE" : "German"}
+langdic = {\
+  "en_GB" : "English (Great Britain)",\
+  "en_US" : "English (United States)",\
+  "de_DE" : "German"\
+}
 
 json_data = ""
 
@@ -199,7 +201,7 @@ df = df.iloc[page_choice: , :]
 
 # estimate
 word_counts = df["page"].apply(lambda n: len(n.split()))
-minutes = word_counts.sum() / 200 #estimate
+minutes = word_counts.sum() / int(speed_choice) #estimate
 seconds = minutes* 60
 
 def convert_to_preferred_format(sec):
