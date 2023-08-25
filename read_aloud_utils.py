@@ -1,11 +1,12 @@
 # 
+import re
 import json
 import locale
 import ctypes
 
 class localized:
   # Switch to default UI's language if possible
-  json_data = ""
+  _json_data = ""
   _windll = ctypes.windll.kernel32
   current_lang = locale.windows_locale[ _windll.GetUserDefaultUILanguage() ]
   
@@ -31,20 +32,42 @@ class localized:
   def __prepareJson(self, langcode):
     try:
       with open(f"locales/{langcode}.json") as jsd:
-        self.__json_data = json.load(jsd)
+        self._json_data = json.load(jsd)
       jsd.close()
     except:
       with open(f"locales/default.json") as jsd:
-        self.__json_data = json.load(jsd)
+        self._json_data = json.load(jsd)
       jsd.close()
     finally:
       with open(f"locales/default.json") as jsd:
-        self.__default = json.load(jsd)
+        self._default = json.load(jsd)
       jsd.close()
   
   def get(self, textkey):
-    if textkey in self.__json_data:
-      return self.__json_data[textkey]
-    if textkey in self.__default:
-      return __default[textkey]
+    if textkey in self._json_data:
+      return self._json_data[textkey]
+    if textkey in self._default:
+      return _default[textkey]
     return textkey + " (no description available)"
+
+
+class textfilter:
+  @staticmethod
+  def make_readable(rawtext):
+    rawtext = [re.sub(r"\n+", " ", str(x)) for x in rawtext]
+    rawtext = [re.sub(r"([a-z])([A-Z])", r"\1 \2", str(x)) for x in rawtext]
+    rawtext = [re.sub(r"([A-Z]{2,})([a-z])", r"\1 \2", str(x)) for x in rawtext]
+    rawtext = [re.sub(r"([0-9])([A-Z])", r"\1 \2", str(x)) for x in rawtext]
+    rawtext = [re.sub(r"([A-Z])([0-9])", r"\1 \2", str(x)) for x in rawtext]
+    rawtext = [re.sub(r"([0-9])([a-z])", r"\1 \2", str(x)) for x in rawtext]
+    rawtext = [re.sub(r"(\))([A-Z])", r"\1 \2", str(x)) for x in rawtext]
+    rawtext = [re.sub(r'– +', "–", str(x)) for x in rawtext]
+    # rawtext = [re.sub(r'\n', " ", str(x)) for x in rawtext]
+    rawtext = [re.sub(r'\s+', " ", str(x)) for x in rawtext]
+    ####
+    # remove control bytes except from \0\t\r\n
+    rawtext = [re.sub(r"[\x01-\x08]", "", str(x)) for x in rawtext]
+    rawtext = [re.sub(r"[\x0b-\x0c]", "", str(x)) for x in rawtext]
+    rawtext = [re.sub(r"[\x0e-\x1f]", "", str(x)) for x in rawtext]
+    rawtext = [re.sub(r"[\x1f]", "", str(x)) for x in rawtext]
+    return rawtext

@@ -16,8 +16,11 @@ import time
 import PyPDF2
 import pyttsx3
 
+from read_aloud_utils import textfilter
+
 # Choose a language
 from read_aloud_utils import localized
+
 locales = localized()
 
 current_language_name = locales.current_language_name
@@ -89,16 +92,7 @@ print(locales.get("DroppingEmptyPages"), str(df.shape[0]))
 time.sleep(1)
 print(locales.get("TidyingUp"))
 
-df['page'] = [re.sub(r'\n+', " ", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([a-z])([A-Z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([A-Z]{2,})([a-z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([0-9])([A-Z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([A-Z])([0-9])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([0-9])([a-z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"(\))([A-Z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r'– +', "–", str(x)) for x in df['page']]
-# df['page'] = [re.sub(r'\n', " ", str(x)) for x in df['page']]
-df['page'] = [re.sub(r'\s+', " ", str(x)) for x in df['page']]
+df['page'] = textfilter.make_readable(df['page'])
 
 content = " ".join(df['page'].tolist())
 
