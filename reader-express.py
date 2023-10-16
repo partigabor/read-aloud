@@ -11,41 +11,21 @@ import pandas as pd
 import numpy as np
 
 import re
-import json
 
 import time
 import PyPDF2
 import pyttsx3
 
-# Switch to default UI's language if possible
-import locale
-import ctypes
-windll = ctypes.windll.kernel32
-current_lang = locale.windows_locale[ windll.GetUserDefaultUILanguage() ]
-langdic = {\
-  "en_GB" : "English (Great Britain)",\
-  "en_US" : "English (United States)",\
-  "de_DE" : "German"\
-}
+from read_aloud_utils import textfilter
 
-json_data = ""
+# Choose a language
+from read_aloud_utils import localized
 
-try:
-  with open(f"locales/{current_lang}.json") as jsd:
-    json_data = json.load(jsd)
-  jsd.close()
-except:
-  with open(f"locales/default.json") as jsd:
-    json_data = json.load(jsd)
-  jsd.close()
+locales = localized()
 
-#for testing 
-#current_language_name = "English (United States)"
-#
-try:
-  current_language_name = langdic[current_lang]
-except:
-  current_language_name = "English (United States)"
+current_language_name = locales.current_language_name
+
+
 
 ### Use auto-py-to-exe to make exe ###
 
@@ -56,7 +36,7 @@ voices = engine.getProperty('voices')
 # voice
 #engine.setProperty('voice', voices[1].id)
 for voice in voices:
-  if current_lang in voice.languages or current_language_name in voice.name:
+  if locales.current_lang in voice.languages or current_language_name in voice.name:
     engine.setProperty('voice', voice.id)
     break
 
@@ -80,9 +60,9 @@ book_choice = pdfs[0]
 # creating a pdf file object
 pdfFileObj = open(path+"\\"+book_choice, 'rb')
 
-print(json_data["ParsingBook"] + path+"\\"+book_choice)
+print(locales.get("ParsingBook") + path+"\\"+book_choice)
 #
-print(json_data["HavePatience"])
+print(locales.get("HavePatience"))
 
 # initialize dataframe to hold documents
 df = pd.DataFrame(columns=['page_no', 'page'])
@@ -102,26 +82,17 @@ for p in range(pages):
 #closing the pdf file object 
 pdfFileObj.close() 
 
-print(json_data["InfoNumPages"].format(df.shape[0]))
+print(locales.get("InfoNumPages").format(df.shape[0]))
 df['page'].replace('', np.nan, inplace=True)
 df.dropna(subset=['page'], inplace=True)
 df.reset_index(drop=True, inplace=True)
 
 # printing number of pages in pdf file 
-print(json_data["DroppingEmptyPages"], str(df.shape[0]))
+print(locales.get("DroppingEmptyPages"), str(df.shape[0]))
 time.sleep(1)
-print(json_data["TidyingUp"])
+print(locales.get("TidyingUp"))
 
-df['page'] = [re.sub(r'\n+', " ", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([a-z])([A-Z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([A-Z]{2,})([a-z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([0-9])([A-Z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([A-Z])([0-9])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"([0-9])([a-z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r"(\))([A-Z])", r"\1 \2", str(x)) for x in df['page']]
-df['page'] = [re.sub(r'– +', "–", str(x)) for x in df['page']]
-# df['page'] = [re.sub(r'\n', " ", str(x)) for x in df['page']]
-df['page'] = [re.sub(r'\s+', " ", str(x)) for x in df['page']]
+df['page'] = textfilter.make_readable(df['page'])
 
 content = " ".join(df['page'].tolist())
 
@@ -139,7 +110,7 @@ def convert_to_preferred_format(sec):
    sec %= 60
    return "%02d:%02d:%02d" % (hour, min, sec) 
 
-print(json_data["EstimatedAudioTime"], convert_to_preferred_format(seconds))
+print(locales.get("EstimatedAudioTime"), convert_to_preferred_format(seconds))
 time.sleep(1)
 
 #play
@@ -149,4 +120,4 @@ for i, row in df.iterrows():
     engine.say(row['page']) # to read immediately
     engine.runAndWait()
 print(ruler)
-print(json_data["BookFinished"])
+print(locales.get("BookFinished"))
