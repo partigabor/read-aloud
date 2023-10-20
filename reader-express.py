@@ -1,5 +1,5 @@
 ruler = "\n###############################################\n"
-print(ruler + "### Initiating Parti's Primitive PDF Reader ###" + ruler)
+print(ruler + "### Initiating Read-Aloud PDF Reader ###" + ruler)
 
 # %pip install pyttsx3
 # %pip install PyPDF2
